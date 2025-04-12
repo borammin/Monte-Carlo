@@ -1,6 +1,10 @@
 import scipy
+import math
+import random
 
 class MonteCarlo:
+    lambdavar = 12
+    
     def __init__(self, start_val=1000, a=24693, c=3517, K=2**17):
         self.start_val = start_val
         self.a = a
@@ -16,7 +20,11 @@ class MonteCarlo:
         return self.rand_num_gen(i) / self.K
 
     def rand_var_gen():
-        return "FINISH THIS SOMEHOW OR THE OTHER"
+        uniform_samples = np.random.uniform(0, 1, size=n_samples)
+        return np.array([inverse_cdf(u) for u in uniform_samples])
+
+    def inverse_cdf(u):
+        return -math.log(u) / lambdavar
 
 # Create an instance and print values
 mc = MonteCarlo()
