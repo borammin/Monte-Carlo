@@ -1,3 +1,5 @@
+import scipy
+
 class MonteCarlo:
     def __init__(self, start_val=1000, a=24693, c=3517, K=2**17):
         self.start_val = start_val
