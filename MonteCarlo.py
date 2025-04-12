@@ -15,6 +15,9 @@ class MonteCarlo:
     def u(self, i):
         return self.rand_num_gen(i) / self.K
 
+    def rand_var_gen():
+        return "FINISH THIS SOMEHOW OR THE OTHER"
+
 # Create an instance and print values
 mc = MonteCarlo()
 print(f"u51: {mc.u(51)}")
