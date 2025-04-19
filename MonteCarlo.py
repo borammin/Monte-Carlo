@@ -25,12 +25,20 @@ class MonteCarlo:
         return self.rand_num_gen(i) / self.K
 
     def rand_var_gen():
-        uniform_samples = np.random.uniform(0, 1, size=n_samples)
+        uniform_samples = self.rand_num_gen(1000)
         return np.array([inverse_cdf(u) for u in uniform_samples])
 
     def inverse_cdf(u):
         return -math.log(u) / lambdavar
 
+    def next_rand(self):
+        self.current = (self.a * self.current + self.c) % self.K
+        return self.current / self.K
+
+    def exponential(self):
+        u = self.next_rand()
+        return -self.lambdavar * math.log(1 - u)
+    
     def call_one_customer(self):
         attempts = 0
         total_time = 0
@@ -56,9 +64,20 @@ class MonteCarlo:
                     total_time += 25
             total_time += 1  # Time to end call
         return total_time
+
+    def run_simulation(self, n=10000):
+        results = [self.call_one_customer() for _ in range(n)]
+        mean = sum(results) / n
+        var = sum((x - mean) ** 2 for x in results) / n
+        std_dev = math.sqrt(var)
+        return mean, std_dev
         
 # Create an instance and print values
 mc = MonteCarlo()
 print(f"u51: {mc.u(51)}")
 print(f"u52: {mc.u(52)}")
 print(f"u53: {mc.u(53)}")
+
+mean, std_dev = mc.run_simulation()
+print(f"Estimated mean time: {mean:.2f} sec")
+print(f"Estimated std deviation: {std_dev:.2f} sec")
