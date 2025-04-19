@@ -3,18 +3,23 @@ import math
 import random
 
 class MonteCarlo:
-    lambdavar = 12
-    
-    def __init__(self, start_val=1000, a=24693, c=3517, K=2**17):
-        self.start_val = start_val
+
+    def __init__(self, start_val=1000, a=24693, c=3517, K=2**17, lambdavar=12):
+        self.seed = start_val
         self.a = a
         self.c = c
         self.K = K
+        self.lambdavar = lambdavar
+        self.current = start_val
 
     def rand_num_gen(self, i):
-        if i <= 0:
-            return (self.a * self.start_val + self.c) % self.K
-        return (self.a * self.rand_num_gen(i - 1) + self.c) % self.K
+        x = self.start_val
+        for _ in range(i):
+            x = (self.a * x + self.c) % self.K
+        return x
+        # if i <= 0:
+        #     return (self.a * self.start_val + self.c) % self.K
+        # return (self.a * self.rand_num_gen(i - 1) + self.c) % self.K
 
     def u(self, i):
         return self.rand_num_gen(i) / self.K
