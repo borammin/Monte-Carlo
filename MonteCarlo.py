@@ -31,6 +31,32 @@ class MonteCarlo:
     def inverse_cdf(u):
         return -math.log(u) / lambdavar
 
+    def call_one_customer(self):
+        attempts = 0
+        total_time = 0
+        while attempts < 4:
+            attempts += 1
+            total_time += 6  # Time to turn on phone and dial
+            outcome = self.next_rand()
+            if outcome < 0.2:
+                # Line is busy
+                total_time += 3
+            elif outcome < 0.5:
+                # Away from phone
+                total_time += 25
+            else:
+                # Available
+                answer_time = self.exponential()
+                if answer_time <= 25:
+                    # Customer answered
+                    total_time += answer_time + 1
+                    break
+                else:
+                    # Did not answer in time
+                    total_time += 25
+            total_time += 1  # Time to end call
+        return total_time
+        
 # Create an instance and print values
 mc = MonteCarlo()
 print(f"u51: {mc.u(51)}")
