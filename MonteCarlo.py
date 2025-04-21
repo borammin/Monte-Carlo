@@ -47,7 +47,7 @@ def call_once(nums, start):
             var = rand_var_gen(answer_time)
             if var <= 25:
                 # Customer answered
-                total_time += var # var time to speak to customer
+                total_time += var # var time customer took to answer
                 break
             else:
                 # Did not answer in time
@@ -71,16 +71,16 @@ def run(n=1000):
     ind = 0
     Wlist = []
     for _ in range(n):
-        W, index = call_once(randvals, ind)
+        W, ind = call_once(randvals, ind)
         Wlist.append(W)
     return Wlist
 
 def statistical_analysis(Wlist):
     Wmatrix = np.array(Wlist)
     mean = np.mean(Wlist)
-    quartile1 = np.percentile(Wmatrix, 25)
-    median = np.median(Wmatrix)
-    quartile3 = np.percentile(Wmatrix, 75)
+    quartile1 = np.percentile(Wlist, 25)
+    median = np.median(Wlist)
+    quartile3 = np.percentile(Wlist, 75)
 
     print("Mean: ", mean)
     print("Median: ", median)
