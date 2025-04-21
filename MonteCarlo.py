@@ -1,83 +1,126 @@
-import scipy
+import numpy as np
+import matplotlib.pyplot as plt
 import math
-import random
 
-class MonteCarlo:
+# Parameters
+lambdavar = 1/12
+a = 24693
+c = 3517
+K = 2**17
+seed = 1000
 
-    def __init__(self, start_val=1000, a=24693, c=3517, K=2**17, lambdavar=12):
-        self.seed = start_val
-        self.a = a
-        self.c = c
-        self.K = K
-        self.lambdavar = lambdavar
-        self.current = start_val
+# Random number generator function
+def rand_num_gen(n):
+    values = []
+    var = seed
+    for _ in range(n):
+        var = (a*var+c) % K
+        values.append(var/K)
+    return values
 
-    def rand_num_gen(self, i):
-        x = self.start_val
-        for _ in range(i):
-            x = (self.a * x + self.c) % self.K
-        return x
-        # if i <= 0:
-        #     return (self.a * self.start_val + self.c) % self.K
-        # return (self.a * self.rand_num_gen(i - 1) + self.c) % self.K
+# Random variable generator function
+def rand_var_gen(u):
+    return -math.log(1 - u)/lambdavar
 
-    def u(self, i):
-        return self.rand_num_gen(i) / self.K
+# Function simulating calling one customer, including the total time and the four attempts
+def call_once(nums, start):
+    attempts = 0
+    total_time = 0
+    trackind = start
 
-    def rand_var_gen():
-        uniform_samples = self.rand_num_gen(1000)
-        return np.array([inverse_cdf(u) for u in uniform_samples])
+    while attempts < 4:
+        attempts += 1
+        total_time += 6  # Time to turn on phone and dial
+        outcome = nums[trackind]
+        trackind += 1
 
-    def inverse_cdf(u):
-        return -math.log(u) / lambdavar
-
-    def next_rand(self):
-        self.current = (self.a * self.current + self.c) % self.K
-        return self.current / self.K
-
-    def exponential(self):
-        u = self.next_rand()
-        return -self.lambdavar * math.log(1 - u)
-    
-    def call_one_customer(self):
-        attempts = 0
-        total_time = 0
-        while attempts < 4:
-            attempts += 1
-            total_time += 6  # Time to turn on phone and dial
-            outcome = self.next_rand()
-            if outcome < 0.2:
-                # Line is busy
-                total_time += 3
-            elif outcome < 0.5:
-                # Away from phone
-                total_time += 25
+        if outcome < 0.2:
+            # Line is busy
+            total_time += 3 # 3 to detect busy line
+        elif outcome < 0.5:
+            # Away from phone
+            total_time += 25 # 25 to wait 5 rings
+        else:
+            # Available
+            answer_time = nums[trackind]
+            trackind += 1
+            var = rand_var_gen(answer_time)
+            if var <= 25:
+                # Customer answered
+                total_time += var # var time to speak to customer
+                break
             else:
-                # Available
-                answer_time = self.exponential()
-                if answer_time <= 25:
-                    # Customer answered
-                    total_time += answer_time + 1
-                    break
-                else:
-                    # Did not answer in time
-                    total_time += 25
-            total_time += 1  # Time to end call
-        return total_time
+                # Did not answer in time
+                total_time += 25 # 25 to wait
+        total_time += 1  # 1 to hang up
+    return total_time, trackind
 
-    def run_simulation(self, n=10000):
-        results = [self.call_one_customer() for _ in range(n)]
-        mean = sum(results) / n
-        var = sum((x - mean) ** 2 for x in results) / n
-        std_dev = math.sqrt(var)
-        return mean, std_dev
-        
-# Create an instance and print values
-mc = MonteCarlo()
-print(f"u51: {mc.u(51)}")
-print(f"u52: {mc.u(52)}")
-print(f"u53: {mc.u(53)}")
+# Running the simulation
+def run(n=1000):
+    randsize = n*10
+    randvals = rand_num_gen(randsize)
 
-mean, std_dev = mc.run_simulation()
-print(f"Estimated mean time: {mean:.2f} sec")
-print(f"Estimated std deviation: {std_dev:.2f} sec")
+    # Printing the requested u values
+    print("u1: ", randvals[0])
+    print("u2: ", randvals[1])
+    print("u3: ", randvals[2])
+    print("u51: ", randvals[50])
+    print("u52: ", randvals[51])
+    print("u53: ", randvals[52])
+
+    ind = 0
+    Wlist = []
+    for _ in range(n):
+        W, index = call_once(randvals, ind)
+        Wlist.append(W)
+    return Wlist
+
+def statistical_analysis(Wlist):
+    Wmatrix = np.array(Wlist)
+    mean = np.mean(Wlist)
+    quartile1 = np.percentile(Wmatrix, 25)
+    median = np.median(Wmatrix)
+    quartile3 = np.percentile(Wmatrix, 75)
+
+    print("Mean: ", mean)
+    print("Median: ", median)
+    print("Q1: ", quartile1)
+    print("Q3: ", quartile3)
+
+    # Right tail
+    for _ in [10, 20, 30, 40]:
+        probability = np.mean(Wmatrix > _)
+        print(f"P[W > {_}] = ", probability)
+
+    # Left tail
+    for _ in [15, 20, 30]:
+        probability = np.mean(Wmatrix <= _)
+        print(f"P[W <= {_}] = ", probability)
+
+def cdf_grapher(Wlist):
+    sorted_Wlist = sorted(Wlist)
+    cdf = np.arange(1, len(sorted_Wlist) + 1) / len(sorted_Wlist)
+    plt.plot(sorted_Wlist, cdf, marker='.', linestyle='-', label='CDF', color='blue')
+    plt.title("Cumulative Distribution Function (CDF) for Total Call Time")
+    plt.xlabel("Total Call Time (sec)")
+    plt.ylabel("CDF Value (no unit)")
+    plt.grid(True)
+    plt.show()
+
+def totaltime_calls_grapher(Wlist):
+    plt.figure()
+    plt.plot(range(1, len(Wlist) + 1), Wlist, marker='.', linestyle='-', color='blue')
+    plt.title("Total Call Time For Each Call Attempt")
+    plt.xlabel("Call Attempt")
+    plt.ylabel("Total Call Time (sec)")
+    plt.grid(True)
+    plt.show()
+
+def main():
+    W = run(1000)
+    statistical_analysis(W)
+    cdf_grapher(W)
+    totaltime_calls_grapher(W)
+
+if __name__ == "__main__":
+    main()
