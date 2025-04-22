@@ -47,7 +47,7 @@ def call_once(nums, start):
             var = rand_var_gen(answer_time)
             if var <= 25:
                 # Customer answered
-                total_time += var # var time customer took to answer
+                total_time += var + 1 # var time customer took to answer
                 break
             else:
                 # Did not answer in time
@@ -56,7 +56,7 @@ def call_once(nums, start):
     return total_time, trackind
 
 # Running the simulation
-def run(n=1000):
+def run(n):
     randsize = n*10
     randvals = rand_num_gen(randsize)
 
@@ -77,10 +77,11 @@ def run(n=1000):
 
 def statistical_analysis(Wlist):
     Wmatrix = np.array(Wlist)
-    mean = np.mean(Wlist)
-    quartile1 = np.percentile(Wlist, 25)
-    median = np.median(Wlist)
-    quartile3 = np.percentile(Wlist, 75)
+    sorted_Wlist = sorted(Wlist)
+    mean = np.mean(sorted_Wlist)
+    quartile1 = np.percentile(sorted_Wlist, 25)
+    median = np.median(sorted_Wlist)
+    quartile3 = np.percentile(sorted_Wlist, 75)
 
     print("Mean: ", mean)
     print("Median: ", median)
@@ -100,7 +101,7 @@ def statistical_analysis(Wlist):
 def cdf_grapher(Wlist):
     sorted_Wlist = sorted(Wlist)
     cdf = np.arange(1, len(sorted_Wlist) + 1) / len(sorted_Wlist)
-    plt.plot(sorted_Wlist, cdf, marker='.', linestyle='-', label='CDF', color='blue')
+    plt.plot(sorted_Wlist, cdf, marker='.', linestyle='-', label='CDF', color='pink')
     plt.title("Cumulative Distribution Function (CDF) for Total Call Time")
     plt.xlabel("Total Call Time (sec)")
     plt.ylabel("CDF Value (no unit)")
@@ -109,7 +110,7 @@ def cdf_grapher(Wlist):
 
 def totaltime_calls_grapher(Wlist):
     plt.figure()
-    plt.plot(range(1, len(Wlist) + 1), Wlist, marker='.', linestyle='-', color='blue')
+    plt.plot(range(1, len(Wlist) + 1), Wlist, marker='.', linestyle='-', color='pink')
     plt.title("Total Call Time For Each Call Attempt")
     plt.xlabel("Call Attempt")
     plt.ylabel("Total Call Time (sec)")
