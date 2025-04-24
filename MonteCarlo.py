@@ -89,7 +89,7 @@ def statistical_analysis(Wlist):
     print("Q3: ", quartile3)
 
     # Right tail
-    for _ in [10, 20, 30, 40]:
+    for _ in [40, 60, 80, 100, 120]:
         probability = np.mean(Wmatrix > _)
         print(f"P[W > {_}] = ", probability)
 
@@ -102,7 +102,48 @@ def cdf_grapher(Wlist):
     sorted_Wlist = sorted(Wlist)
     cdf = np.arange(1, len(sorted_Wlist) + 1) / len(sorted_Wlist)
     plt.plot(sorted_Wlist, cdf, marker='.', linestyle='-', label='CDF', color='pink')
+
     plt.title("Cumulative Distribution Function (CDF) for Total Call Time")
+    plt.xlabel("Total Call Time (sec)")
+    plt.ylabel("CDF Value (no unit)")
+    plt.grid(True)
+    plt.show()
+
+def cdf_with_stats_grapher(Wlist):
+    sorted_Wlist = sorted(Wlist)
+    cdf = np.arange(1, len(sorted_Wlist) + 1) / len(sorted_Wlist)
+    plt.plot(sorted_Wlist, cdf, marker='.', linestyle='-', label='CDF', color='pink')
+
+    plt.plot(np.mean(Wlist), .585, 'bo', label='Mean')
+    plt.text(np.mean(Wlist), .595, "Mean: "f'{np.mean(Wlist):.2f}', ha='left', va='bottom')
+    plt.plot(np.median(Wlist), .495, 'bo', label='Median')
+    plt.text(np.median(Wlist), .505, "Median: "f'{np.median(Wlist):.2f}', ha='left', va='bottom')
+    plt.plot(np.percentile(Wlist, 25), .26, 'bo', label='Q1')
+    plt.text(np.percentile(Wlist, 25), .27, "Q1: "f'{np.percentile(Wlist, 25):.2f}', ha='left', va='bottom')
+    plt.plot(np.percentile(Wlist, 75), .755, 'bo', label='Q3')
+    plt.text(np.percentile(Wlist, 75), .765, "Q3: "f'{np.percentile(Wlist, 75):.2f}', ha='left', va='bottom')
+
+    plt.title("Cumulative Distribution Function (CDF) for Total Call Time")
+    plt.xlabel("Total Call Time (sec)")
+    plt.ylabel("CDF Value (no unit)")
+    plt.grid(True)
+    plt.show()
+
+def cdf_with_probs_grapher(Wlist):
+    sorted_Wlist = sorted([15, 20, 30, 40, 60, 80, 100, 120])
+    cdf = np.arange(1, len(sorted_Wlist) + 1) / len(sorted_Wlist)
+    plt.plot(sorted_Wlist, cdf, marker='.', linestyle='-', label='CDF', color='pink', linewidth=2.5)
+
+    plt.axvline(15, color='blue',linestyle='--')
+    plt.axvline(20, color='blue', linestyle='--')
+    plt.axvline(30, color='blue', linestyle='--')
+    plt.axvline(40, color='blue', linestyle='--')
+    plt.axvline(60, color='blue', linestyle='--')
+    plt.axvline(80, color='blue', linestyle='--')
+    plt.axvline(100, color='blue', linestyle='--')
+    plt.axvline(120, color='blue', linestyle='--')
+
+    plt.title("Cumulative Distribution Function (CDF) Using Probability Values")
     plt.xlabel("Total Call Time (sec)")
     plt.ylabel("CDF Value (no unit)")
     plt.grid(True)
@@ -121,6 +162,8 @@ def main():
     W = run(1000)
     statistical_analysis(W)
     cdf_grapher(W)
+    cdf_with_stats_grapher(W)
+    cdf_with_probs_grapher(W)
     totaltime_calls_grapher(W)
 
 if __name__ == "__main__":
